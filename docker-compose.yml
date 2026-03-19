@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  usuarios-db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: usuario
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: usuarios_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - usuarios-db-data:/var/lib/postgresql/data
+
+  servicio-usuarios:
+    build: ./servicio-usuarios
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql://usuario:password@usuarios-db:5432/usuarios_db
+    depends_on:
+      - usuarios-db
+
+volumes:
+  usuarios-db-data:
