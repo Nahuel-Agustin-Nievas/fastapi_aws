@@ -8,9 +8,16 @@ services:
       POSTGRES_PASSWORD: password
       POSTGRES_DB: usuarios_db
     ports:
-      - "5433:5432"
+      - "5434:5432"
     volumes:
       - usuarios-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U usuario -d usuarios_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ecommerce-net
 
   servicio-usuarios:
     build: ./servicio-usuarios
@@ -19,7 +26,82 @@ services:
     environment:
       DATABASE_URL: postgresql://usuario:password@usuarios-db:5432/usuarios_db
     depends_on:
-      - usuarios-db
+      usuarios-db:
+        condition: service_healthy
+    networks:
+      - ecommerce-net
+
+  productos-db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: usuario
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: productos_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - productos-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U usuario -d productos_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ecommerce-net
+
+  servicio-productos:
+    build: ./servicio-productos
+    ports:
+      - "8001:8000"
+    environment:
+      DATABASE_URL: postgresql://usuario:password@productos-db:5432/productos_db
+    depends_on:
+      productos-db:
+        condition: service_healthy
+    networks:
+      - ecommerce-net
+
+  pedidos-db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: usuario
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: pedidos_db
+    ports:
+      - "5435:5432"
+    volumes:
+      - pedidos-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U usuario -d pedidos_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ecommerce-net
+
+  servicio-pedidos:
+    build: ./servicio-pedidos
+    ports:
+      - "8002:8000"
+    environment:
+      DATABASE_URL: postgresql://usuario:password@pedidos-db:5432/pedidos_db
+      USUARIOS_SERVICE_URL: http://servicio-usuarios:8000
+      PRODUCTOS_SERVICE_URL: http://servicio-productos:8000
+    depends_on:
+      pedidos-db:
+        condition: service_healthy
+      servicio-usuarios:
+        condition: service_started
+      servicio-productos:
+        condition: service_started
+    networks:
+      - ecommerce-net
+
+networks:
+  ecommerce-net:
+    driver: bridge
 
 volumes:
   usuarios-db-data:
+  productos-db-data:
+  pedidos-db-data:
