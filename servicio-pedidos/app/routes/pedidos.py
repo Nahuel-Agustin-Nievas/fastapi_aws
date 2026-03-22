@@ -4,14 +4,22 @@ from ..database import get_db
 from ..models import Pedido
 from ..schemas import PedidoCreate, PedidoResponse, PedidoUpdateEstado
 from ..utils.http_client import obtener_usuario, obtener_producto
+from ..utils.security import verificar_token
 from typing import List
 import asyncio
 
 router = APIRouter()
 
 @router.post("/", response_model=PedidoResponse, status_code=201)
-async def crear_pedido(pedido: PedidoCreate, db: Session = Depends(get_db)):
-    # Verificar usuario y producto en paralelo
+async def crear_pedido(
+    pedido: PedidoCreate,
+    db: Session = Depends(get_db),
+    usuario_id_token: int = Depends(verificar_token)
+):
+    # Verificar que el usuario del token coincide con el del pedido
+    if usuario_id_token != pedido.usuario_id:
+        raise HTTPException(status_code=403, detail="No podés crear pedidos para otro usuario")
+
     usuario, producto = await asyncio.gather(
         obtener_usuario(pedido.usuario_id),
         obtener_producto(pedido.producto_id)

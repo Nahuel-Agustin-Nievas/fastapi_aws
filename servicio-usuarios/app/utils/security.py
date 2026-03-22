@@ -1,8 +1,9 @@
 from passlib.context import CryptContext
 from jose import jwt
 from datetime import datetime, timedelta
+import os
 
-SECRET_KEY = "clave-secreta-cambiar-en-produccion"
+SECRET_KEY = os.environ.get("SECRET_KEY", "clave-secreta-cambiar-en-produccion")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 

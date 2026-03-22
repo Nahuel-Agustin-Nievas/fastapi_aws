@@ -25,6 +25,7 @@ services:
       - "8000:8000"
     environment:
       DATABASE_URL: postgresql://usuario:password@usuarios-db:5432/usuarios_db
+      SECRET_KEY: ${SECRET_KEY}
     depends_on:
       usuarios-db:
         condition: service_healthy
@@ -87,6 +88,7 @@ services:
       DATABASE_URL: postgresql://usuario:password@pedidos-db:5432/pedidos_db
       USUARIOS_SERVICE_URL: http://servicio-usuarios:8000
       PRODUCTOS_SERVICE_URL: http://servicio-productos:8000
+      SECRET_KEY: ${SECRET_KEY}
     depends_on:
       pedidos-db:
         condition: service_healthy

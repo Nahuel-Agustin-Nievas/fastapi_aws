@@ -1,8 +1,9 @@
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from jose import jwt, JWTError
+import os
 
-SECRET_KEY = "clave-secreta-cambiar-en-produccion"
+SECRET_KEY = os.environ.get("SECRET_KEY", "clave-secreta-cambiar-en-produccion")
 ALGORITHM = "HS256"
 
 security = HTTPBearer()
